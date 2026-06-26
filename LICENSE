@@ -1,0 +1,43 @@
+This repository contains two distinct types of content, each governed by its own license.
+
+---
+
+1. Code and scripts (the "Code")
+
+This includes, but is not limited to:
+- Build scripts (split.sh, build.sh, compile.sh)
+- Makefiles, configuration files
+- Any other executable or interpretable files used for tooling and automation
+
+The Code is licensed under the MIT License.
+You are free to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the Code.
+The only condition is that the original copyright notice and permission notice are included in all copies or substantial portions of the Code.
+
+See licenses/LICENSE.MIT for the full text.
+
+---
+
+2. Book content (the "Text")
+
+This includes, but is not limited to:
+- All prose in the book chapters
+- The table of contents, preface, and appendices
+- Explanations, analyses, opinions, and arguments presented in the text
+- Diagrams and illustrations (if any) that are part of the book content
+
+The Text is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+- Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- NonCommercial — You may not use the material for commercial purposes.
+- ShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license.
+
+See licenses/LICENSE.CC-BY-NC-SA for the full text.
+
+---
+
+Questions about licensing? Open an issue or contact the author.
