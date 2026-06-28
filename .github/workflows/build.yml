@@ -61,7 +61,16 @@ jobs:
             git push
           fi
 
-      # ── 4. 构建 Rspress 网站 ──
+      # ── 4. 构建 Wiki ──
+      - name: 安装 mdBook
+        run: |
+          curl -sL "https://github.com/rust-lang/mdBook/releases/download/v0.4.40/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/mb.tar.gz
+          tar xzf /tmp/mb.tar.gz -C /tmp/
+
+      - name: 构建 Wiki
+        run: /tmp/mdbook build wiki/ -d ../book-site/doc_build/wiki
+
+      # ── 5. 构建 Rspress 网站 ──
       - name: 安装依赖
         working-directory: ./book-site
         run: npm ci

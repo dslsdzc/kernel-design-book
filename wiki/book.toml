@@ -1,0 +1,12 @@
+[book]
+title = "内核设计 Wiki"
+authors = ["DslsDZC"]
+language = "zh-CN"
+
+[output.html]
+site-url = "/kernel-design-book/wiki/"
+git-repository-url = "https://github.com/dslsdzc/kernel-design-book"
+edit-url-template = "https://github.com/dslsdzc/kernel-design-book/edit/main/wiki/src/{path}"
+
+[output.html.search]
+limit-results = 30
