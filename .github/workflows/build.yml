@@ -72,8 +72,7 @@ jobs:
       - name: 拷贝下载文件到网站
         run: |
           mkdir -p book-site/doc_build/downloads
-          cp output/book.epub book-site/doc_build/downloads/ 2>/dev/null
-          cp output/book.pdf  book-site/doc_build/downloads/ 2>/dev/null
+          cp -r output/* book-site/doc_build/downloads/ 2>/dev/null || true
 
       - name: 构建网站
         working-directory: ./book-site
