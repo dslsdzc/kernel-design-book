@@ -21,7 +21,8 @@
   - [同步](scheduling/synchronization.md)
   - [死锁](scheduling/deadlock.md)
 - [结构模型](structure/README.md)
-  - [Structure 模型](structure/README.md)
+  - [分层](structure/layering.md)
+  - [结构模型](structure/README.md)
 - [资源模型](resource/README.md)
   - [Resource 模型](resource/README.md)
 
