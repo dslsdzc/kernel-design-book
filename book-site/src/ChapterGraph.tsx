@@ -55,7 +55,7 @@ export default function ChapterGraph() {
           if (params.nodes.length > 0) {
             const n = data.nodes.find((x: any) => x.id === params.nodes[0]);
             if (n) {
-              window.location.href = `/kernel-design-book/${n.partDir}/${n.slug}`;
+              window.location.href = `/kernel-design-book/${n.partDir}/${n.slug}.html`;
             }
           }
         });
