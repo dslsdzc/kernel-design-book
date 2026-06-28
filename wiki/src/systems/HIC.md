@@ -8,3 +8,4 @@
   - [HIC 中的全局能力表传递](../permission/delegation.md#hic-中的全局能力表传递)
   - [HIC 的撤销](../permission/revocation.md#hic-的撤销)
   - [HIC 能力系统](../permission/capability.md#hic-能力系统)
+  - [HIC 调度：逻辑核心配额](../scheduling/scheduling.md#hic-调度：逻辑核心配额)

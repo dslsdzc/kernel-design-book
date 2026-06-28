@@ -17,6 +17,7 @@
 - [调度模型](scheduling/README.md)
   - [Scheduling 模型](scheduling/README.md)
   - [RISC-V 中断入口 (M-mode)](scheduling/interrupts.md)
+  - [调度模型](scheduling/scheduling.md)
 - [结构模型](structure/README.md)
   - [Structure 模型](structure/README.md)
 - [资源模型](resource/README.md)
