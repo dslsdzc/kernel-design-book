@@ -118,9 +118,9 @@ for f2 in sorted(glob.glob(os.path.join(repo, '第*_*/*.md'))):
     slug = m2.group(2)
     with open(f2) as fh:
         title = fh.readline().strip().lstrip('# ')
-    part_map = [(range(1,5),'1-overview'),(range(5,10),'2-resources'),(range(10,22),'3-permissions'),
-                (range(22,51),'4-scheduling'),(range(51,64),'5-structure'),(range(64,68),'6-design'),
-                (range(68,80),'7-arch'),(range(80,86),'8-classic')]
+    part_map = [(range(1,5),'part1-overview'),(range(5,10),'part2-resources'),(range(10,22),'part3-permissions'),
+                (range(22,51),'part4-scheduling'),(range(51,64),'part5-structure'),(range(64,68),'part6-design'),
+                (range(68,80),'part7-arch'),(range(80,86),'part8-classic')]
     part_dir = next((d for rng,d in part_map if cn in rng), '')
     part_name = next((p for rng,p in [(range(1,5),'总起'),(range(5,10),'资源'),(range(10,22),'权限'),
         (range(22,51),'调度'),(range(51,64),'结构'),(range(64,68),'设计'),
