@@ -46,8 +46,11 @@ void scan_file(const char *path, const char *rel) {
             // 检查是否包含系统名
             for (int s = 0; sys_names[s]; s++) {
                 if (strstr(h2_text, sys_names[s])) {
+                    // 系统页在 systems/ 子目录，链接需加 ../
+                    char link[512];
+                    snprintf(link, sizeof(link), "../%s", rel);
                     char buf[MAX_LINE];
-                    snprintf(buf, sizeof(buf), "  - [%s](%s)", h2_text, rel);
+                    snprintf(buf, sizeof(buf), "  - [%s](%s)", h2_text, link);
                     systems[s].items[systems[s].n++] = strdup(buf);
                     break;
                 }
