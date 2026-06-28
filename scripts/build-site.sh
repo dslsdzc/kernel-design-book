@@ -139,8 +139,7 @@ for f2 in sorted(glob.glob(os.path.join(repo, '第*_*/*.md'))):
 for s, t in sorted(all_edges):
     graph_data['edges'].append({'source': s, 'target': t})
 
-with open(os.path.join(docs, 'graph-data.json'), 'w') as f:
-    json.dump(graph_data, f, ensure_ascii=False)
+json.dump(graph_data, open(os.path.join(docs, 'graph-data.json'), 'w'), ensure_ascii=False)
 print(f'[GRAPH] 图谱数据: {len(graph_data[\"nodes\"])} 节点, {len(graph_data[\"edges\"])} 条边')
 
 # 输出统计

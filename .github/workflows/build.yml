@@ -76,7 +76,9 @@ jobs:
 
       - name: 构建网站
         working-directory: ./book-site
-        run: npx rspress build
+        run: |
+          npx rspress build
+          cp docs/graph-data.json doc_build/ 2>/dev/null || true
 
       # ── 5. 部署 GitHub Pages ──
       - name: 上传 artifact
