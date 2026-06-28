@@ -82,7 +82,7 @@ for dir_name, title, src_dir in parts:
         f.write(f'# {title}\n')
 
     # 遍历章节文件
-    ch_meta = ['index']
+    ch_meta = []
     for ch_file in sorted(os.listdir(src_path)):
         if not ch_file.endswith('.md'): continue
         slug = re.sub(r'^\d+_', '', ch_file[:-3])
