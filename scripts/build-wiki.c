@@ -47,8 +47,20 @@ void scan_file(const char *path, const char *rel) {
             in_h2 = 1;
             for (int s = 0; sys_names[s]; s++) {
                 if (strstr(h2_text, sys_names[s])) {
+                    // 生成锚点：与 mdBook/pulldown-cmark 一致
+                    // 规则：大写→小写，空格/特殊字符→-，保留中文字符
+                    char anchor[256]; int ai=0;
+                    for (int ci=0; h2_text[ci] && ai<250; ci++) {
+                        unsigned char c = h2_text[ci];
+                        if (c >= 'A' && c <= 'Z') anchor[ai++] = c - 'A' + 'a';
+                        else if (c >= 'a' && c <= 'z') anchor[ai++] = c;
+                        else if (c >= '0' && c <= '9') anchor[ai++] = c;
+                        else if (c >= 0x80) anchor[ai++] = c; // 保留中文
+                        else if (c == ' ' || c == '-' || c == '_') anchor[ai++] = '-';
+                    }
+                    anchor[ai] = 0;
                     char link[512], buf[MAX_LINE];
-                    snprintf(link, sizeof(link), "../%s", rel);
+                    snprintf(link, sizeof(link), "../%s#%s", rel, anchor);
                     snprintf(buf, sizeof(buf), "  - [%s](%s)", h2_text, link);
                     systems[s].items[systems[s].n++] = strdup(buf);
                     break;
