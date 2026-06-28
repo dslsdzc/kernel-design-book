@@ -8,6 +8,7 @@ on:
       - '引言.md'
       - 'scripts/**'
       - 'book-site/**'
+      - 'wiki/**'
   workflow_dispatch:
 
 permissions:
@@ -20,14 +21,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  # ── 1. 先部署网站 ──
+  site:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # ── 1. 安装工具 ──
-      - name: 安装 pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -37,48 +35,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # ── 2. 合并所有章节并编译多格式 ──
-      - name: 合并为 book.md
-        run: bash scripts/build.sh
-
-      - name: 编译 EPUB
-        run: bash scripts/compile.sh book.md epub || true
-
-      - name: 编译 HTML
-        run: bash scripts/compile.sh book.md html || true
-
-      # ── 3. 提交产物回仓库 ──
-      - name: 提交 book.md 和编译产物
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add book.md output/
-          if ! git diff --cached --quiet; then
-            git commit -m "自动构建: book.md + EPUB/HTML [skip ci]"
-            git push
-          fi
-
-      # ── 4. 构建 Wiki ──
       - name: 安装 mdBook
         run: |
           curl -sL "https://github.com/rust-lang/mdBook/releases/download/v0.4.40/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/mb.tar.gz
           tar xzf /tmp/mb.tar.gz -C /tmp/
 
-      - name: 构建 Wiki
-        run: /tmp/mdbook build wiki/ -d ../book-site/doc_build/wiki
-
-      # ── 5. 构建 Rspress 网站 ──
-      - name: 安装依赖
+      - name: 安装 Rspress 依赖
         working-directory: ./book-site
         run: npm ci
 
       - name: 生成网站源文件
         run: bash scripts/build-site.sh
 
-      - name: 拷贝下载文件到网站
-        run: |
-          mkdir -p book-site/doc_build/downloads
-          cp -r output/* book-site/doc_build/downloads/ 2>/dev/null || true
+      - name: 构建 Wiki
+        run: /tmp/mdbook build wiki/ -d ../book-site/doc_build/wiki
 
       - name: 构建网站
         working-directory: ./book-site
@@ -86,14 +56,13 @@ jobs:
           npx rspress build
           cp docs/graph-data.json doc_build/ 2>/dev/null || true
 
-      # ── 5. 部署 GitHub Pages ──
       - name: 上传 artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./book-site/doc_build
 
   deploy:
-    needs: build
+    needs: site
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -102,3 +71,32 @@ jobs:
       - name: 部署
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # ── 2. 再构建 book.md + EPUB/HTML ──
+  book:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      - name: 合并所有章节为 book.md
+        run: bash scripts/build.sh
+
+      - name: 编译 EPUB
+        run: bash scripts/compile.sh book.md epub || true
+
+      - name: 编译 HTML
+        run: bash scripts/compile.sh book.md html || true
+
+      - name: 提交 book.md 和编译产物到仓库
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add book.md output/
+          if ! git diff --cached --quiet; then
+            git commit -m "自动构建: book.md + EPUB/HTML [skip ci]"
+            git push
+          fi
