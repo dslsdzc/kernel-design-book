@@ -48,6 +48,9 @@ hero:
     - theme: alt
       text: GitHub
       link: https://github.com/dslsdzc/kernel-design-book
+    - theme: alt
+      text: 内核设计 Wiki
+      link: /kernel-design-book/wiki/index.html
 features:
   - title: 权限模型
     details: 谁可以用？允许还是禁止？权限从哪里来、如何传递、如何撤销？
