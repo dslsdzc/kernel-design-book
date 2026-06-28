@@ -47,9 +47,6 @@ jobs:
       - name: 编译 HTML
         run: bash scripts/compile.sh book.md html || true
 
-      - name: 编译 PDF
-        run: sudo apt-get install -y texlive-xetex texlive-lang-chinese 2>/dev/null; bash scripts/compile.sh book.md pdf || echo "PDF 跳过"
-
       # ── 3. 提交产物回仓库 ──
       - name: 提交 book.md 和编译产物
         run: |
@@ -57,7 +54,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add book.md output/
           if ! git diff --cached --quiet; then
-            git commit -m "自动构建: book.md + EPUB/PDF/HTML [skip ci]"
+            git commit -m "自动构建: book.md + EPUB/HTML [skip ci]"
             git push
           fi
 
