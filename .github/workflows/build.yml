@@ -49,7 +49,7 @@ jobs:
         run: bash scripts/build-site.sh
 
       - name: 构建 Wiki
-        run: /tmp/mdbook build wiki/ -d ../book-site/doc_build/wiki
+        run: /tmp/mdbook build wiki/ -d book-site/doc_build/wiki
 
       - name: 构建网站
         working-directory: ./book-site
