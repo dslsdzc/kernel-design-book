@@ -54,8 +54,10 @@ jobs:
           npx rspress build
           cp docs/graph-data.json doc_build/ 2>/dev/null || true
 
-      - name: 构建 Wiki（必须在 Rspress 之后，否则会被覆盖）
-        run: /tmp/mdbook build wiki/ -d book-site/doc_build/wiki
+      - name: 构建 Wiki
+        run: |
+          /tmp/mdbook build wiki/ -d "$GITHUB_WORKSPACE/book-site/doc_build/wiki"
+          ls -la "$GITHUB_WORKSPACE/book-site/doc_build/wiki/" | head -5
 
       - name: 上传 artifact
         uses: actions/upload-pages-artifact@v3
