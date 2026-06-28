@@ -4,5 +4,6 @@
 
 ## 相关内容
 
-  - [HIC 的能力衰减](../permission/least-privilege.md)
-  - [HIC 中的全局能力表传递](../permission/delegation.md)
+  - [HIC 的能力衰减](../permission/least-privilege.md#hic-的能力衰减)
+  - [HIC 中的全局能力表传递](../permission/delegation.md#hic-中的全局能力表传递)
+  - [HIC 的撤销](../permission/revocation.md#hic-的撤销)

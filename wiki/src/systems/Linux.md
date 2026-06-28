@@ -4,4 +4,4 @@
 
 ## 相关内容
 
-  - [Linux Capabilities](../permission/least-privilege.md)
+  - [Linux Capabilities](../permission/least-privilege.md#linux-capabilities)

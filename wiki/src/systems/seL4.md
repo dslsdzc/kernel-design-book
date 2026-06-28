@@ -4,4 +4,5 @@
 
 ## 相关内容
 
-  - [seL4 的 Mint 操作](../permission/least-privilege.md)
+  - [seL4 的 Mint 操作](../permission/least-privilege.md#sel4-的-mint-操作)
+  - [seL4 递归撤销算法](../permission/revocation.md#sel4-递归撤销算法)
