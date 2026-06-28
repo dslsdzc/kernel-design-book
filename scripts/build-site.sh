@@ -132,10 +132,10 @@ for f2 in sorted(glob.glob(os.path.join(repo, '第*_*/*.md'))):
     with open(f2) as fh:
         for line in fh:
             if line.strip().startswith('#'): continue
-            for m3 in re.finditer(r'第(\d+)章(?!\s)', line):
+            for m3 in re.finditer(r'第(\d+)章', line):
                 tc = int(m3.group(1))
                 if tc != cn and 1 <= tc <= 85:
-                    all_edges.add((min(cn, tc), max(cn, tc)))
+                    all_edges.add((cn, tc))
 for s, t in sorted(all_edges):
     graph_data['edges'].append({'source': s, 'target': t})
 
