@@ -9,6 +9,7 @@ on:
       - 'scripts/**'
       - 'book-site/**'
       - 'wiki/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:

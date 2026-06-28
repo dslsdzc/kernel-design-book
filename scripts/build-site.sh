@@ -1,5 +1,5 @@
 #!/bin/bash
-# 构建 Rspress 静态网站（全自动，新增章节自动发现）
+# 构建 Rspress 静态网站 + 图谱数据（全自动，新增章节自动发现）
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
