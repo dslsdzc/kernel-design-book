@@ -54,10 +54,10 @@ jobs:
           npx rspress build
           cp docs/graph-data.json doc_build/ 2>/dev/null || true
 
-      - name: 构建 Wiki
+      - name: 构建 Wiki（生成系统页 + SUMMARY + 编译）
         run: |
+          bash scripts/build-wiki.sh
           /tmp/mdbook build wiki/ -d "$GITHUB_WORKSPACE/book-site/doc_build/wiki"
-          ls -la "$GITHUB_WORKSPACE/book-site/doc_build/wiki/" | head -5
 
       - name: 上传 artifact
         uses: actions/upload-pages-artifact@v3
