@@ -21,6 +21,8 @@
   - [同步](scheduling/synchronization.md)
   - [死锁](scheduling/deadlock.md)
   - [内存调度](scheduling/memory-scheduling.md)
+  - [EEVDF 调度器](scheduling/eevdf.md)
+  - [上下文切换](scheduling/context-switch.md)
 - [结构模型](structure/README.md)
   - [分层](structure/layering.md)
   - [结构模型](structure/README.md)
@@ -28,6 +30,10 @@
   - [可扩展性](structure/extensibility.md)
 - [资源模型](resource/README.md)
   - [Resource 模型](resource/README.md)
+  - [伙伴系统](resource/buddy-system.md)
+  - [Slab 分配器](resource/slab-allocator.md)
+  - [进程间通信 (IPC)](resource/ipc.md)
+  - [虚拟内存](resource/virtual-memory.md)
 
 ---
 

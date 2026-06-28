@@ -12,3 +12,4 @@
   - [HIC 调度：机制与策略分离](../scheduling/scheduling.md#hic-调度：机制与策略分离)
   - [HIC 无锁设计](../scheduling/synchronization.md#hic-无锁设计)
   - [HIC 无锁消除死锁](../scheduling/deadlock.md#hic-无锁消除死锁)
+  - [HIC IPC 3.0](../resource/ipc.md#hic-ipc-30)

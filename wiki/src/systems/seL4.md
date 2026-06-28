@@ -8,3 +8,4 @@
   - [seL4 递归撤销算法](../permission/revocation.md#sel4-递归撤销算法)
   - [seL4 能力空间 (CSpace) 实现](../permission/capability.md#sel4-能力空间-cspace-实现)
   - [seL4 两级调度](../scheduling/scheduling.md#sel4-两级调度)
+  - [seL4 同步 IPC](../resource/ipc.md#sel4-同步-ipc)

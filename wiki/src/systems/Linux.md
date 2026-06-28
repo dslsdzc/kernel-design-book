@@ -15,3 +15,5 @@
   - [Multi-Gen LRU (Linux 6.1+)](../scheduling/memory-scheduling.md#multi-gen-lru-linux-61)
   - [Linux VFS 分层架构](../structure/layering.md#linux-vfs-分层架构)
   - [Linux 可加载内核模块 (LKM)](../structure/modularity.md#linux-可加载内核模块-lkm)
+  - [Linux Pipe 实现](../resource/ipc.md#linux-pipe-实现)
+  - [Linux x86-64 页表遍历](../resource/virtual-memory.md#linux-x86-64-页表遍历)
