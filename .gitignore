@@ -1,0 +1,5 @@
+book-site/doc_build/
+book-site/node_modules/
+book-site/.rspress/
+book-site/docs/
+*.log
