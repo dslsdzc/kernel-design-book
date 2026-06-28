@@ -39,17 +39,16 @@ void scan_file(const char *path, const char *rel) {
             continue;
         }
 
-        // 匹配 H2 标题
-        if (line[0] == '#' && line[1] == '#' && line[2] == ' ') {
-            strncpy(h2_text, line+3, sizeof(h2_text)-1);
+        // 匹配所有 ## / ### / #### 等标题（跳过头部的 #）
+        char *hdr = line;
+        while (*hdr == '#') hdr++;
+        if (hdr - line >= 2 && *hdr == ' ') {
+            strncpy(h2_text, hdr + 1, sizeof(h2_text)-1);
             in_h2 = 1;
-            // 检查是否包含系统名
             for (int s = 0; sys_names[s]; s++) {
                 if (strstr(h2_text, sys_names[s])) {
-                    // 系统页在 systems/ 子目录，链接需加 ../
-                    char link[512];
+                    char link[512], buf[MAX_LINE];
                     snprintf(link, sizeof(link), "../%s", rel);
-                    char buf[MAX_LINE];
                     snprintf(buf, sizeof(buf), "  - [%s](%s)", h2_text, link);
                     systems[s].items[systems[s].n++] = strdup(buf);
                     break;

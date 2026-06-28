@@ -2,4 +2,6 @@
 
 该页面自动聚合了各概念页中提及 seL4 的内容。
 
-暂未收录相关内容。
+## 相关内容
+
+  - [seL4 的 Mint 操作](../permission/least-privilege.md)

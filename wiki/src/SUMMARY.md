@@ -4,18 +4,22 @@
 
 ---
 - [权限模型](permission/README.md)
-  - [access-control-triple](permission/access-control-triple.md)
-  - [acl](permission/acl.md)
-  - [attenuation](permission/attenuation.md)
-  - [capability](permission/capability.md)
-  - [delegation](permission/delegation.md)
-  - [label](permission/label.md)
-  - [least-privilege](permission/least-privilege.md)
-  - [revocation](permission/revocation.md)
-  - [root-of-trust](permission/root-of-trust.md)
+  - [权限模型](permission/README.md)
+  - [控制的三要素](permission/access-control-triple.md)
+  - [最小权限原则](permission/least-privilege.md)
+  - [权限的衰减](permission/attenuation.md)
+  - [权限的撤销](permission/revocation.md)
+  - [权限的来源：信任锚](permission/root-of-trust.md)
+  - [标签模型](permission/label.md)
+  - [能力模型](permission/capability.md)
+  - [ACL 模型](permission/acl.md)
+  - [权限的传递：Move / Copy / Mint](permission/delegation.md)
 - [调度模型](scheduling/README.md)
+  - [Scheduling 模型](scheduling/README.md)
 - [结构模型](structure/README.md)
+  - [Structure 模型](structure/README.md)
 - [资源模型](resource/README.md)
+  - [Resource 模型](resource/README.md)
 
 ---
 

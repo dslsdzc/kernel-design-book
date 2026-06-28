@@ -4,4 +4,5 @@
 
 ## 相关内容
 
-  - [HIC 中的全局能力表传递](permission/delegation.md)
+  - [HIC 的能力衰减](../permission/least-privilege.md)
+  - [HIC 中的全局能力表传递](../permission/delegation.md)
