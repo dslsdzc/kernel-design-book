@@ -22,6 +22,17 @@ PARTS=(
 rm -rf "$DOCS_DIR"
 mkdir -p "$DOCS_DIR"
 
+# 知识图谱页
+cat > "$DOCS_DIR/graph.mdx" << 'EOF'
+# 章节关系图
+
+85 章之间的交叉引用可视化。每个节点代表一章，连线表示引用关系。
+
+import ChapterGraph from '../src/ChapterGraph';
+
+<ChapterGraph />
+EOF
+
 # 首页
 cat > "$DOCS_DIR/index.md" << 'EOF'
 ---
@@ -49,7 +60,7 @@ EOF
 # 用 Python 生成所有 JSON（避免 shell 的 JSON 转义问题）
 export REPO_DIR
 python3 -c "
-import json, os, re
+import json, os, re, glob
 
 repo = os.environ['REPO_DIR']
 parts = [
@@ -66,7 +77,7 @@ parts = [
 docs = os.path.join(repo, 'book-site', 'docs')
 
 # 根 _meta.json
-root_meta = []
+root_meta = [{'type': 'file', 'name': 'graph', 'label': '章节关系图'}]
 for dir_name, title, _ in parts:
     root_meta.append({'type': 'dir', 'name': dir_name, 'label': title})
 with open(os.path.join(docs, '_meta.json'), 'w') as f:
@@ -104,15 +115,19 @@ for f2 in sorted(glob.glob(os.path.join(repo, '第*_*/*.md'))):
     m2 = re.search(r'(\d+)_(.+?)\.md', os.path.basename(f2))
     if not m2: continue
     cn = int(m2.group(1))
+    slug = m2.group(2)
     with open(f2) as fh:
         title = fh.readline().strip().lstrip('# ')
+    part_map = [(range(1,5),'1-overview'),(range(5,10),'2-resources'),(range(10,22),'3-permissions'),
+                (range(22,51),'4-scheduling'),(range(51,64),'5-structure'),(range(64,68),'6-design'),
+                (range(68,80),'7-arch'),(range(80,86),'8-classic')]
+    part_dir = next((d for rng,d in part_map if cn in rng), '')
+    part_name = next((p for rng,p in [(range(1,5),'总起'),(range(5,10),'资源'),(range(10,22),'权限'),
+        (range(22,51),'调度'),(range(51,64),'结构'),(range(64,68),'设计'),
+        (range(68,80),'架构'),(range(80,86),'经典')] if cn in rng), '')
     graph_data['nodes'].append({
-        'id': cn, 'label': f'第{cn}章', 'title': title,
-        'part': next((p for rng, p in [
-            (range(1,5),'总起'), (range(5,10),'资源'), (range(10,22),'权限'),
-            (range(22,51),'调度'), (range(51,64),'结构'), (range(64,68),'设计'),
-            (range(68,80),'架构'), (range(80,86),'经典')
-        ] if cn in rng), ''),
+        'id': cn, 'label': f'第{cn}章', 'title': title, 'slug': slug,
+        'part': part_name, 'partDir': part_dir,
     })
     with open(f2) as fh:
         for line in fh:

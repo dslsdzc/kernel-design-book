@@ -9,7 +9,9 @@
     "preview": "rspress preview"
   },
   "dependencies": {
-    "@rspress/core": "^2.0.14"
+    "@rspress/core": "^2.0.14",
+    "vis-data": "^8.0.3",
+    "vis-network": "^10.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.8.1",
