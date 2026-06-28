@@ -1,0 +1,3 @@
+# 内存模型 (FLATMEM/DISCONTIGMEM/SPARSEMEM)
+
+> 内容整理中
