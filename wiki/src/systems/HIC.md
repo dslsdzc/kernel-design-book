@@ -8,4 +8,7 @@
   - [HIC 中的全局能力表传递](../permission/delegation.md#hic-中的全局能力表传递)
   - [HIC 的撤销](../permission/revocation.md#hic-的撤销)
   - [HIC 能力系统（实际实现）](../permission/capability.md#hic-能力系统（实际实现）)
+  - [HIC 信任链实现](../permission/root-of-trust.md#hic-信任链实现)
   - [HIC 调度：机制与策略分离](../scheduling/scheduling.md#hic-调度：机制与策略分离)
+  - [HIC 无锁设计](../scheduling/synchronization.md#hic-无锁设计)
+  - [HIC 无锁消除死锁](../scheduling/deadlock.md#hic-无锁消除死锁)
