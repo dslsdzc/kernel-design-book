@@ -56,7 +56,8 @@ jobs:
 
       - name: 构建 Wiki
         run: |
-          scripts/build-wiki wiki/src/
+          scripts/build-wiki wiki/src/          # 生成系统聚合页
+          python3 scripts/build-summary.py       # 生成归类目录
           /tmp/mdbook build wiki/ -d "$GITHUB_WORKSPACE/book-site/doc_build/wiki"
 
       - name: 上传 artifact
