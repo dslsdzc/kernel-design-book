@@ -6,3 +6,4 @@
 
   - [seL4 的 Mint 操作](../permission/least-privilege.md#sel4-的-mint-操作)
   - [seL4 递归撤销算法](../permission/revocation.md#sel4-递归撤销算法)
+  - [seL4 能力空间 (CSpace) 实现](../permission/capability.md#sel4-能力空间-cspace-实现)

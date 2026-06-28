@@ -5,3 +5,4 @@
 ## 相关内容
 
   - [Linux Capabilities](../permission/least-privilege.md#linux-capabilities)
+  - [Linux 能力系统实现](../permission/capability.md#linux-能力系统实现)
