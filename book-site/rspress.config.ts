@@ -3,6 +3,7 @@ import { defineConfig } from '@rspress/core';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
+  base: '/kernel-design-book/',
   lang: 'zh',
   title: '如何设计内核：权限、调度与结构',
   description: '从零理解操作系统内核设计的三个基本模型',
