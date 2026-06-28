@@ -12,4 +12,6 @@
   - [Linux 自旋锁实现 (Queued Spinlock)](../scheduling/synchronization.md#linux-自旋锁实现-queued-spinlock)
   - [Linux RCU 实现](../scheduling/synchronization.md#linux-rcu-实现)
   - [Linux lockdep 实现](../scheduling/deadlock.md#linux-lockdep-实现)
+  - [Multi-Gen LRU (Linux 6.1+)](../scheduling/memory-scheduling.md#multi-gen-lru-linux-61)
   - [Linux VFS 分层架构](../structure/layering.md#linux-vfs-分层架构)
+  - [Linux 可加载内核模块 (LKM)](../structure/modularity.md#linux-可加载内核模块-lkm)

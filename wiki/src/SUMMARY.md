@@ -20,9 +20,12 @@
   - [调度模型](scheduling/scheduling.md)
   - [同步](scheduling/synchronization.md)
   - [死锁](scheduling/deadlock.md)
+  - [内存调度](scheduling/memory-scheduling.md)
 - [结构模型](structure/README.md)
   - [分层](structure/layering.md)
   - [结构模型](structure/README.md)
+  - [模块化](structure/modularity.md)
+  - [可扩展性](structure/extensibility.md)
 - [资源模型](resource/README.md)
   - [Resource 模型](resource/README.md)
 
