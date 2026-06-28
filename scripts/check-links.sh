@@ -18,7 +18,7 @@ check_url() {
   content_type=$(echo "$result" | cut -d'|' -f3)
 
   if [ "$http_code" = "000" ] || [ -z "$http_code" ]; then
-    echo "❌ ERR 连接失败    $file:$lineno  $url"
+    echo "[ERR] ERR 连接失败    $file:$lineno  $url"
     FAILED=$((FAILED + 1)); rm -f "$tmpf"; return
   fi
 
@@ -26,7 +26,7 @@ check_url() {
   if ! echo "$content_type" | grep -qi "pdf"; then
     title=$(grep -oP "(?<=<title>)[^<]+" "$tmpf" 2>/dev/null | head -1)
     if echo "$title" | grep -qiP "(404|not.?found|page.?not|不存在|未找到|sorry|oops|not available|not be found)"; then
-      echo "⚠️ 软404 $http_code  $file:$lineno  title=[$title]  $url"
+      echo "[WARN] 软404 $http_code  $file:$lineno  title=[$title]  $url"
       SOFT404=$((SOFT404 + 1)); rm -f "$tmpf"; return
     fi
   fi
@@ -34,8 +34,8 @@ check_url() {
 
   case "$http_code" in
     200|301|302|403|202) ;;
-    404) echo "❌ 404        $file:$lineno  $url"; FAILED=$((FAILED + 1)) ;;
-    *)   echo "❌ $http_code    $file:$lineno  $url"; FAILED=$((FAILED + 1)) ;;
+    404) echo "[ERR] 404        $file:$lineno  $url"; FAILED=$((FAILED + 1)) ;;
+    *)   echo "[ERR] $http_code    $file:$lineno  $url"; FAILED=$((FAILED + 1)) ;;
   esac
 }
 
@@ -67,12 +67,12 @@ done < <(find "$REPO_DIR" -maxdepth 2 -name '*.md' \
 msg "----"
 msg "检查完成: $TOTAL 个链接"
 if [ "$FAILED" -gt 0 ]; then
-  msg "❌ $FAILED 个链接失效"
+  msg "[ERR] $FAILED 个链接失效"
   exit 1
 elif [ "$SOFT404" -gt 0 ]; then
-  msg "⚠️  $SOFT404 个软 404（需人工确认）"
+  msg "[WARN]  $SOFT404 个软 404（需人工确认）"
   exit 0
 else
-  msg "✅ 全部通过"
+  msg "[OK] 全部通过"
   exit 0
 fi

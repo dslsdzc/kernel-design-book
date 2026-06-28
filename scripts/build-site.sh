@@ -96,12 +96,44 @@ for dir_name, title, src_dir in parts:
     with open(os.path.join(part_doc, '_meta.json'), 'w') as f:
         json.dump(ch_meta, f, ensure_ascii=False, indent=2)
 
+# 导出图谱数据
+graph_data = {'nodes': [], 'edges': []}
+all_edges = set()
+
+for f2 in sorted(glob.glob(os.path.join(repo, '第*_*/*.md'))):
+    m2 = re.search(r'(\d+)_(.+?)\.md', os.path.basename(f2))
+    if not m2: continue
+    cn = int(m2.group(1))
+    with open(f2) as fh:
+        title = fh.readline().strip().lstrip('# ')
+    graph_data['nodes'].append({
+        'id': cn, 'label': f'第{cn}章', 'title': title,
+        'part': next((p for rng, p in [
+            (range(1,5),'总起'), (range(5,10),'资源'), (range(10,22),'权限'),
+            (range(22,51),'调度'), (range(51,64),'结构'), (range(64,68),'设计'),
+            (range(68,80),'架构'), (range(80,86),'经典')
+        ] if cn in rng), ''),
+    })
+    with open(f2) as fh:
+        for line in fh:
+            if line.strip().startswith('#'): continue
+            for m3 in re.finditer(r'第(\d+)章(?!\s)', line):
+                tc = int(m3.group(1))
+                if tc != cn and 1 <= tc <= 85:
+                    all_edges.add((min(cn, tc), max(cn, tc)))
+for s, t in sorted(all_edges):
+    graph_data['edges'].append({'source': s, 'target': t})
+
+with open(os.path.join(docs, 'graph-data.json'), 'w') as f:
+    json.dump(graph_data, f, ensure_ascii=False)
+print(f'[GRAPH] 图谱数据: {len(graph_data[\"nodes\"])} 节点, {len(graph_data[\"edges\"])} 条边')
+
 # 输出统计
 total = 0
 for root, dirs, files in os.walk(docs):
     for f in files:
         if f.endswith('.md'):
             total += 1
-print(f'✅ 网站源文件已生成: {docs}')
+print(f'[OK] 网站源文件已生成: {docs}')
 print(f'总数: {total} 个页面')
 "
