@@ -9,6 +9,6 @@
   - [Linux POSIX ACL 实现](../permission/acl.md#linux-posix-acl-实现)
   - [SELinux 实现](../permission/label.md#selinux-实现)
   - [Linux CFS 调度器实现](../scheduling/scheduling.md#linux-cfs-调度器实现)
-  - [Linux 自旋锁实现](../scheduling/synchronization.md#linux-自旋锁实现)
+  - [Linux 自旋锁实现 (Queued Spinlock)](../scheduling/synchronization.md#linux-自旋锁实现-queued-spinlock)
   - [Linux RCU 实现](../scheduling/synchronization.md#linux-rcu-实现)
   - [Linux lockdep 实现](../scheduling/deadlock.md#linux-lockdep-实现)

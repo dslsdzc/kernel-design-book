@@ -6,88 +6,102 @@
 
 | 方面 | 常规 | Linux | seL4 | HIC | QNX | RTEMS | FreeRTOS |
 |------|------|-------|------|-----|-----|-------|---------|
-| 基本原语 | 互斥锁 | mutex/spinlock/rwsem | IPC (Send/Recv) | 无锁环形缓冲区 + Core-0 串行化 | mutex/semaphore | semaphore/event | mutex/semaphore |
-| 内核锁 | 自旋锁 | spinlock_t | 无锁（隐式串行化） | Core-0 关中断无锁 | 自适应自旋 | 关中断 | 关调度 |
+| 基本原语 | 互斥锁 | mutex/spinlock/rwsem | IPC (Send/Recv) | 无锁环形缓冲区 + Core-0 串⾏化 | mutex/semaphore | semaphore/event | mutex/semaphore |
+| 内核锁 | 自旋锁 | qspinlock | 无锁（隐式串⾏化） | Core-0 关中断无锁 | 自适应自旋 | 关中断 | 关调度 |
 | RCU | 可选 | 主线 RCU | 不适用 | 不适用 | 不适用 | 不适用 | 不适用 |
-| 死锁预防 | 锁排序 | lockdep 验证 | IPC 不会死锁 | 无锁设计 | 优先级继承 | 优先级继承 | 锁排序 |
 
-## Linux 自旋锁实现
+## Linux 自旋锁实现 (Queued Spinlock)
+
+现代 Linux 使用 queued spinlock（qspinlock），优化多核争用场景：
 
 ```c
-// include/linux/spinlock.h
-typedef struct spinlock {
-    union {
-        struct raw_spinlock rlock;
-    };
-} spinlock_t;
+// arch/x86/include/asm/qspinlock.h
+// 使用 atomic_try_cmpxchg() 尝试获取锁（编译为 lock cmpxchg）
+#define __queued_spin_lock(lock) \
+    do { \
+        int __val; \
+        while ((__val = atomic_read(&lock->val)) || \
+               !atomic_try_cmpxchg(&lock->val, &__val, _Q_LOCKED_VAL)) \
+            cpu_relax(); \
+    } while (0)
 
-// arch/x86/include/asm/spinlock.h — x86 自旋锁
-static __always_inline void spin_lock(spinlock_t *lock) {
-    // x86 使用 LOCK CMPXCHG 实现
-    asm volatile("1: lock; cmpxchg %1, %0\n\t"
-                 "jz 2f\n\t"
-                 "rep; nop\n\t"
-                 "test %0, %0\n\t"
-                 "jnz 1b\n\t"
-                 "2:"
-                 : "+m" (lock->rlock.lock), "+a" (0)
-                 : "r" (1)
-                 : "memory");
-}
+// 生成的汇编：
+//    mov    $0x1,%edx
+//    mov    (%rbx),%eax      ; atomic_read
+//    test   %eax,%eax
+//    jne    loop             ; 锁已被持有，自旋
+//    lock cmpxchg %edx,(%rbx) ; 尝试获取
+//    jne    loop             ; 失败则重试
+//    pause                    ; cpu_relax()
 ```
 
 ## Linux RCU 实现
 
-RCU（Read-Copy-Update）在读多写少场景中将同步开销从读者转移到写者：
+读侧路径极快——只需递增嵌套计数：
 
 ```c
-// 读侧：几乎零开销
-rcu_read_lock();          // 标记读临界区开始
-ptr = rcu_dereference(p); // 读取指针
-rcu_read_unlock();        // 标记读临界区结束
+// kernel/rcu/tree.c — Preemptible RCU
+void __rcu_read_lock(void) {
+    current->rcu_read_lock_nesting++;
+    barrier();
+}
 
-// 写侧：复制、更新、等待宽限期
-new_ptr = kmalloc(...);
-*new_ptr = *ptr;          // 复制数据
-rcu_assign_pointer(p, new_ptr); // 原子替换指针
-synchronize_rcu();        // 等待所有读者完成
-kfree(ptr);               // 释放旧数据
+void __rcu_read_unlock(void) {
+    struct task_struct *t = current;
+    if (t->rcu_read_lock_nesting != 1) {
+        --t->rcu_read_lock_nesting;
+    } else {
+        barrier();
+        t->rcu_read_lock_nesting = INT_MIN;
+        barrier();
+        if (unlikely(READ_ONCE(t->rcu_read_unlock_special)))
+            rcu_read_unlock_special(t);
+        barrier();
+        t->rcu_read_lock_nesting = 0;
+    }
+}
+
+// 写者等待宽限期
+// kernel/rcu/tree.c
+void synchronize_rcu(void) {
+    // 检查是否在 RCU 读侧临界区内
+    RCU_LOCKDEP_WARN(lock_is_held(&rcu_lock_map), ...);
+    if (rcu_blocking_is_gp()) return;  // 单核：立即返回
+    if (rcu_gp_is_expedited())
+        synchronize_rcu_expedited();   // 快速路径（IPI）
+    else
+        wait_rcu_gp(call_rcu);         // 正常路径
+}
 ```
 
 ## HIC 无锁设计
 
+HIC 核心路径无锁——Core-0 单核执行禁用中断保证原子性，Privileged-1 层服务间通过无锁环形缓冲区通信：
+
 ```c
-// src/Core-0/scheduler.c — Core-0 运行在单核模式，禁用中断保证原子性
-// Privileged-1 层服务之间通过无锁环形缓冲区通信
+// src/Core-0/scheduler.c — Core-0 单核串⾏化
+// Core-0 运行在单核模式，禁用中断保证原子性
+// 能力表更新由 Core-0 串⾏化执行，不需要锁
 
-// 无锁环形缓冲区：仅使用内存屏障和原子操作
-struct lockless_ring {
-    volatile u32 head;
-    volatile u32 tail;
-    u8 data[RING_SIZE];
-};
+// src/Core-0/capability_core.c — Per-core slot 分区
+// 每个核独占 CAP_SLOTS_PER_CORE 个槽位，无全局锁竞争
+#define CAP_SLOTS_PER_CORE   256
+u32 g_cap_next_free[CAP_MAX_CORES];
 
-bool ring_push(struct lockless_ring *ring, u8 *data, u32 len) {
-    u32 next = (ring->head + 1) % RING_SIZE;
-    if (next == ring->tail) return false;  // 满
-    memcpy(&ring->data[ring->head], data, len);
-    atomic_store(&ring->head, next);        // 原子更新头指针
-    return true;
-}
-
-bool ring_pop(struct lockless_ring *ring, u8 *data, u32 *len) {
-    if (ring->tail == ring->head) return false;  // 空
-    memcpy(data, &ring->data[ring->tail], *len);
-    atomic_store(&ring->tail, (ring->tail + 1) % RING_SIZE);
-    return true;
+// 分配新能力：从 per-core 槽位分配器获取，无需锁
+cap_id_t cap_alloc(domain_id_t domain) {
+    u32 core = get_core_id();
+    cap_id_t id = core * CAP_SLOTS_PER_CORE + g_cap_next_free[core]++;
+    // ... 初始化能力表项
+    return id;
 }
 ```
 
 ## 参考文献
 
-- Linux kernel source: `kernel/locking/spinlock.c`, `kernel/rcu/`
-- "Understanding the Linux Kernel", 3rd Ed., Ch.5 (Kernel Synchronization)
+- Linux kernel source: `arch/x86/include/asm/qspinlock.h`, `kernel/rcu/tree.c`
+- "Understanding the Linux Kernel", 3rd Ed., Ch.5
+- McKenney, "Is Parallel Programming Hard?", 2025 Ed.
 - Herlihy & Shavit, "The Art of Multiprocessor Programming"
-- seL4 Manual, §3.2 IPC
 
 > 对应书籍：第 33 章
