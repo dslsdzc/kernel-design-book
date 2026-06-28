@@ -140,15 +140,56 @@ thread_t *schedule(void) {
 }
 ```
 
-## HIC 调度：逻辑核心配额
+## HIC 调度：机制与策略分离
 
-```
-Privileged-1 层：硬性分配逻辑核心 + 时间配额
-  → Core-0 保证服务在周期内获得确定 CPU 份额
+HIC 遵循"机制与策略分离"——Core-0 只提供上下文切换机制，调度策略完全委托给 Privileged-1 层。
 
-Application-3 层：资源充足→独占核心，紧张→轮转退化
-  → 独占时零切换开销，轮转时公平分配
+```c
+// src/Core-0/scheduler.c — 极简调度器（仅机制）
+// Core-0 提供 context-switch 机制和 idle 线程
+// 调度策略完全委托给 Privileged-1 层的 exec_flow_dispatch()
+
+thread_t *g_current_thread = NULL;
+
+void scheduler_init(void) {
+    memzero(&idle_thread, sizeof(thread_t));
+    idle_thread.state = THREAD_STATE_READY;
+    idle_thread.priority = HIC_PRIORITY_IDLE;
+    // 设置 idle 线程栈：entry = hal_halt
+    u64 *stack_top = &g_idle_stack[1024];
+    stack_top--;
+    *stack_top = (u64)hal_halt;
+    idle_thread.stack_ptr = (virt_addr_t)stack_top;
+}
+
+// 启动阶段：顺序分派所有就绪的 EFC（执行流上下文）
+void hic_boot_dispatch_all(void) {
+    for (u32 i = 0; i < MAX_THREADS; i++) {
+        thread_t *t = &g_threads[i];
+        if (t->state != THREAD_STATE_READY) continue;
+        exec_flow_dispatch(exec_flow_id_for_thread(i), 0);
+    }
+}
 ```
+
+### 逻辑核心能力化
+
+物理核心被抽象为逻辑核心，每个逻辑核心是一个能力对象，Privileged-1 服务通过持有逻辑核心能力获得计算资源保证：
+
+```c
+// src/Core-0/capability.h — 逻辑核心能力项
+struct {
+    logical_core_id_t   logical_core_id;
+    logical_core_flags_t flags;
+    logical_core_quota_t quota;          // 时间配额
+    u8 sched_policy;                     // 调度策略
+    u8 max_derived_policy;               // 允许派生的最高策略
+} logical_core;
+```
+
+调度策略分层：
+- **Privileged-1 层**：硬性分配逻辑核心 + 时间配额，Core-0 保证周期内确定 CPU 份额
+- **Application-3 层**：资源充足时独占核心，紧张时退化为时间片轮转
 
 ## 参考文献
 

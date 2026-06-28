@@ -182,27 +182,102 @@ void cteDelete(cte_t *cte) {
 }
 ```
 
-## HIC 能力系统
+## HIC 能力系统（实际实现）
+
+### 能力表项
 
 ```c
-// HIC 能力表条目
-struct hic_cap_entry {
-    uint64_t  cap_id;        // 64位能力ID
-    uint64_t  owner_domain;  // 持有者域ID
-    uint64_t  perms;         // 权限位图
-    uint64_t  parent_id;     // 父能力ID（派生树）
-    uint64_t  type;          // 能力类型
-    bool      valid;         // 有效标志
-};
+// src/Core-0/capability.h
+typedef u32 cap_rights_t;
 
-// 能力验证（Core-0 路径）
-int hic_cap_check(cap_id_t cap_id, domain_id_t caller,
-                  perm_t required) {
-    struct hic_cap_entry *entry = &cap_table[cap_id];
-    if (!entry->valid)             return -1;  // 无效能力
-    if (entry->owner_domain != caller) return -2; // 不属于调用者
-    if ((entry->perms & required) != required) return -3; // 权限不足
-    return 0;  // 验证通过
+/* 全局能力表项（64字节，缓存行对齐） */
+typedef struct __attribute__((aligned(64))) cap_entry {
+    cap_id_t       cap_id;       /* 能力ID */
+    cap_rights_t   rights;       /* 权限 */
+    domain_id_t    owner;        /* 拥有者 */
+    u8             flags;        /* 标志位（含 CAP_FLAG_REVOKED） */
+    u8             owner_core;   /* 归属核心（per-core slot 分区） */
+    u8             reserved[6];
+    
+    union {
+        struct { phys_addr_t base; size_t size; } memory;
+        struct {
+            logical_core_id_t logical_core_id;
+            logical_core_quota_t quota;
+            u8 sched_policy;
+        } logical_core;
+        struct { thread_id_t thread_id; } thread_efc;
+    };
+} cap_entry_t;
+
+/* 全局能力表 */
+__capability cap_entry_t g_global_cap_table[CAP_TABLE_SIZE];  // 8192 项
+```
+
+### 能力句柄编码
+
+HIC 将能力 ID 和令牌编码为 64 位句柄：
+
+```c
+// 句柄 = (token << 32) | cap_id
+// cap_id 占低 32 位，token 占高 32 位
+static inline cap_handle_t cap_build_handle(cap_id_t cap_id, u32 token) {
+    return ((u64)token << CAP_HANDLE_TOKEN_SHIFT) | cap_id;
+}
+
+static inline cap_id_t cap_get_cap_id(cap_handle_t handle) {
+    return (cap_id_t)(handle & CAP_HANDLE_CAP_MASK);
+}
+
+static inline u32 cap_get_token(cap_handle_t handle) {
+    return (u32)(handle >> CAP_HANDLE_TOKEN_SHIFT);
+}
+```
+
+### 能力验证（快速路径 < 5ns @ 3GHz）
+
+```c
+// src/Core-0/capability_core.c
+hic_status_t cap_check_access(domain_id_t domain, cap_handle_t handle,
+                              cap_rights_t required) {
+    if (handle == CAP_HANDLE_INVALID)
+        return HIC_ERROR_INVALID_PARAM;
+
+    cap_id_t cap_id = cap_get_cap_id(handle);
+    if (cap_id >= CAP_TABLE_SIZE)
+        return HIC_ERROR_INVALID_PARAM;
+
+    atomic_acquire_barrier();
+    cap_entry_t *entry = &g_global_cap_table[cap_id];
+
+    if (entry->cap_id != cap_id)        // 能力ID不匹配
+        return HIC_ERROR_CAP_INVALID;
+    if (entry->flags & CAP_FLAG_REVOKED) // 已撤销
+        return HIC_ERROR_CAP_REVOKED;
+    if ((entry->rights & required) != required) // 权限不足
+        return HIC_ERROR_PERMISSION;
+
+    // 验证令牌：确保句柄属于该域
+    u32 token = cap_get_token(handle);
+    if (!cap_validate_token(domain, cap_id, token))
+        return HIC_ERROR_PERMISSION;
+
+    return HIC_SUCCESS;
+}
+
+// 内联快速路径 (~12条指令)
+static inline bool cap_fast_check(domain_id_t domain, cap_handle_t handle,
+                                  cap_rights_t required) {
+    cap_id_t cap_id = (cap_id_t)(handle & CAP_HANDLE_CAP_MASK);
+    if (cap_id >= CAP_TABLE_SIZE) return false;
+    
+    cap_entry_t *entry = &g_global_cap_table[cap_id];
+    if (entry->cap_id != cap_id) return false;
+    if (entry->flags & CAP_FLAG_REVOKED) return false;
+    if ((entry->rights & required) != required) return false;
+    
+    u32 token = (u32)(handle >> CAP_HANDLE_TOKEN_SHIFT);
+    return (token == cap_generate_token(domain, cap_id));
 }
 ```
 
